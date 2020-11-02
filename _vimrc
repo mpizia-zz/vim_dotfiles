@@ -62,9 +62,16 @@ call plug#begin('~/.vim/plugged')
   Plug 'ryanoasis/vim-devicons'
   Plug 'vim-airline/vim-airline'
   Plug 'vim-airline/vim-airline-themes'
-  Plug 'neoclide/coc.nvim', {'branch': 'release'}
-  Plug 'tenfyzhong/CompleteParameter.vim'
   Plug 'OmniSharp/omnisharp-vim'
+
+  Plug 'prabirshrestha/async.vim'
+  Plug 'prabirshrestha/vim-lsp'
+  Plug 'prabirshrestha/asyncomplete.vim'
+  Plug 'prabirshrestha/asyncomplete-lsp.vim'
+  Plug 'prabirshrestha/asyncomplete-ultisnips.vim'
+  Plug 'SirVer/ultisnips'
+  Plug 'honza/vim-snippets'
+
   Plug 'tpope/vim-dispatch'
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
@@ -82,34 +89,44 @@ endif
 
 map p "+gP
 
-" ====== coc settings start =============================
+" Asyncomplete: {{{
+let g:asyncomplete_auto_popup = 1
+let g:asyncomplete_auto_completeopt = 1
 
-let g:coc_global_extensions=[ 'coc-omnisharp', 'coc-json', 'coc-sql', 'coc-eslint', 'coc-html', 'coc-db' , 'coc-snippets' ]
-
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? coc#_select_confirm() :
-      \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
+autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
 
 function! s:check_back_space() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~# '\s'
+    let col = col('.') - 1
+    return !col || getline('.')[col - 1]  =~ '\s'
 endfunction
 
-let g:coc_snippet_next = '<tab>'
+inoremap <silent><expr> <TAB>
+  \ pumvisible() ? "\<C-n>" :
+  \ <SID>check_back_space() ? "\<TAB>" :
+  \ asyncomplete#force_refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 
-" Explorer
-nmap <space>e :CocCommand explorer<CR>
-nmap <space>f :CocCommand explorer --preset floating<CR>
-autocmd BufEnter * if (winnr("$") == 1 && &filetype == 'coc-explorer') | q | endif
+silent! call asyncomplete#register_source(asyncomplete#sources#ultisnips#get_source_options({
+    \ 'name': 'ultisnips',
+    \ 'whitelist': ['*'],
+    \ 'blacklist': [],
+    \ 'completor': function('asyncomplete#sources#ultisnips#completor'),
+    \ }))
 
-" NOTE: For XAML files, in vim you can run :setf xml
-" and this will treat it as an xml file and will show coloring which makes it easier to read.
-
-au BufRead *.cs silent! CocRestart
-
-" ====== coc settings end ===============================
+let g:UltiSnipsUsePythonVersion = 3
+let g:UltiSnipsExpandTrigger="<nor>"
+let g:ulti_expand_or_jump_res = 0
+function! <SID>ExpandSnippetOrReturn()
+  let snippet = UltiSnips#ExpandSnippetOrJump()
+  if g:ulti_expand_or_jump_res > 0
+    return snippet
+  else
+    return "\<C-Y>"
+  endif
+endfunction
+inoremap <expr> <CR> pumvisible() ? "<C-R>=<SID>ExpandSnippetOrReturn()<CR>" : "\<CR>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"                                       
+let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
 " ========= airline settings start ======================
 
@@ -160,20 +177,25 @@ let g:OmniSharp_timeout = 30
 let g:OmniSharp_autoselect_existing_sln = 1
 
 let g:OmniSharp_popup_options = {
-\ 'highlight': 'Normal',
-\ 'padding': [1],
-\ 'border': [1]
+\ 'padding': [1]
 \}
-
+autocmd CursorHold *.cs OmniSharpTypeLookup
 let g:OmniSharp_selector_ui = 'fzf'
 let g:OmniSharp_selector_findusages = 'fzf'
 let g:OmniSharp_highlighting = 3
 let g:OmniSharp_diagnostic_listen = 0
+let g:OmniSharp_want_snippet = 1
+
+let g:OmniSharp_popup_mappings = {
+\ 'sigNext': '<C-n>',
+\ 'sigPrev': '<C-p>',
+\ 'lineDown': ['<C-e>', 'j'],
+\ 'lineUp': ['<C-y>', 'k']
+\}
+autocmd FileType cs nmap <silent> <buffer> <C-\> <Plug>(omnisharp_signature_help)
+autocmd FileType cs imap <silent> <buffer> <C-\> <Plug>(omnisharp_signature_help)
 
 nmap <space>o :OmniSharpStartServer<CR> :OmniSharpHighlight<CR>
-
-"inoremap <expr> <Tab> pumvisible() ? '<C-n>' :                                                                                                                    
-"\ getline('.')[col('.')-2] =~# '[[:alnum:].-_#$]' ? '<C-x><C-o>' : '<Tab>'
 " =============== OmniSharp settings end=================
 
 " =================NERDTree settings start===============
@@ -218,12 +240,12 @@ set t_Co=256
 
 " Define reusable colorvariables.
 let s:white="#FFFFFF"
-let s:bg="#32302f"
+let s:bg="#282828"
 let s:fg="#fdf4c1"
 let s:fg2="#e9e0b2"
 let s:fg3="#d5cda2"
 let s:fg4="#c0b993"
-let s:bg2="#2e2c2b"
+let s:bg2="#222222"
 let s:bg3="#4a4a4a"
 let s:bg4="#5c5c5c"
 let s:cursorLinebg="#3C3836"
@@ -254,7 +276,7 @@ exe 'hi Cursorline  guibg='s:cursorLinebg
 exe 'hi CursorColumn  guibg='s:bg2 
 exe 'hi LineNr guifg='s:comment' guibg='s:bg 
 exe 'hi CursorLineNr  guifg='s:cursorLinefg' guibg='s:cursorLinebg
-exe 'hi VertSplit guifg='s:bg2' guibg='s:bg2 
+exe 'hi VertSplit guifg='s:cursorLinebg' guibg='s:cursorLinebg 
 exe 'hi MatchParen guifg='s:warning2'  gui=underline'
 exe 'hi StatusLine guifg='s:fg2' guibg='s:bg3' gui=NONE'
 exe 'hi Pmenu guifg='s:fg' guibg='s:bg2
