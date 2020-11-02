@@ -64,10 +64,8 @@ call plug#begin('~/.vim/plugged')
   Plug 'vim-airline/vim-airline-themes'
   Plug 'OmniSharp/omnisharp-vim'
 
-  Plug 'prabirshrestha/async.vim'
-  Plug 'prabirshrestha/vim-lsp'
+
   Plug 'prabirshrestha/asyncomplete.vim'
-  Plug 'prabirshrestha/asyncomplete-lsp.vim'
   Plug 'prabirshrestha/asyncomplete-ultisnips.vim'
   Plug 'SirVer/ultisnips'
   Plug 'honza/vim-snippets'
