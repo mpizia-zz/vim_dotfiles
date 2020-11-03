@@ -1,32 +1,29 @@
 "Allow project specific .vimrc execution
+syntax on
+
 set exrc
-filetype indent plugin on
-
-"no backup files
 set nobackup
-
-nnoremap p "+gP
-
-"only in case you don't want a backup file while editing
 set nowritebackup
-
-"no swap files
 set noswapfile
-
-" No wrapping
 set nowrap
-
-" Highlight search results when using /
 set hlsearch
-
-" Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
-" delays and poor user experience.
-set updatetime=500
-
-" all utf-8
+set bs=2
+set relativenumber
+set belloff=all
+set tabstop=4 softtabstop=0 expandtab shiftwidth=4
 set encoding=utf-8
 set fileencoding=utf-8
 set termencoding=utf-8
+set updatetime=500
+set t_Co=256
+set secure
+set mouse=a
+"set signcolumn=no
+
+filetype indent plugin on
+
+map p "+gP
+nnoremap <silent> <C-p> :Files<CR>
 
 "Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
 "If you're using tmux version 2.2 or later, you can remove the outermost $TMUX check and use tmux's 24-bit color support
@@ -44,31 +41,13 @@ if (empty($TMUX))
   endif
 endif
 
-" enable backspace...
-set bs=2
 
-"show line numbers
-set relativenumber
-
-" don't beep
-set belloff=all
-
-" 4 spaces indentation
-set tabstop=4 softtabstop=0 expandtab shiftwidth=4
-
-"Let's setup the plugins
 call plug#begin('~/.vim/plugged')
-  Plug 'preservim/nerdtree', { 'on': 'NERDTreeToggle' }
   Plug 'ryanoasis/vim-devicons'
   Plug 'vim-airline/vim-airline'
   Plug 'vim-airline/vim-airline-themes'
-  Plug 'OmniSharp/omnisharp-vim'
 
-
-  Plug 'prabirshrestha/asyncomplete.vim'
-  Plug 'prabirshrestha/asyncomplete-ultisnips.vim'
-  Plug 'SirVer/ultisnips'
-  Plug 'honza/vim-snippets'
+  Plug 'valloric/youcompleteme'
 
   Plug 'tpope/vim-dispatch'
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
@@ -76,66 +55,44 @@ call plug#begin('~/.vim/plugged')
   Plug 'rrethy/vim-illuminate'
   Plug 'unblevable/quick-scope'
   Plug 'mhinz/vim-startify'
+  Plug 'psliwka/vim-smoothie'
 call plug#end()
 
-" CMDER SETTINGS
+
 if !has("gui_running")
     set t_Co=256
     let &t_AB="\e[48;5;%dm"
     let &t_AF="\e[38;5;%dm"
 endif
 
-map p "+gP
-
-" Asyncomplete: {{{
-let g:asyncomplete_auto_popup = 1
-let g:asyncomplete_auto_completeopt = 1
-
-autocmd! CompleteDone * if pumvisible() == 0 | pclose | endif
-
-function! s:check_back_space() abort
-    let col = col('.') - 1
-    return !col || getline('.')[col - 1]  =~ '\s'
-endfunction
-
-inoremap <silent><expr> <TAB>
-  \ pumvisible() ? "\<C-n>" :
-  \ <SID>check_back_space() ? "\<TAB>" :
-  \ asyncomplete#force_refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-
-silent! call asyncomplete#register_source(asyncomplete#sources#ultisnips#get_source_options({
-    \ 'name': 'ultisnips',
-    \ 'whitelist': ['*'],
-    \ 'blacklist': [],
-    \ 'completor': function('asyncomplete#sources#ultisnips#completor'),
-    \ }))
-
-let g:UltiSnipsUsePythonVersion = 3
-let g:UltiSnipsExpandTrigger="<nor>"
-let g:ulti_expand_or_jump_res = 0
-function! <SID>ExpandSnippetOrReturn()
-  let snippet = UltiSnips#ExpandSnippetOrJump()
-  if g:ulti_expand_or_jump_res > 0
-    return snippet
-  else
-    return "\<C-Y>"
-  endif
-endfunction
-inoremap <expr> <CR> pumvisible() ? "<C-R>=<SID>ExpandSnippetOrReturn()<CR>" : "\<CR>"
-let g:UltiSnipsJumpForwardTrigger="<tab>"                                       
-let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+set completeopt+=popup
+set completepopup=height:10,width:60,highlight:Pmenu,border:off
+let g:ycm_min_num_of_chars_for_completion = 1
+let g:ycm_show_diagnostics_ui = 0
+let g:ycm_add_preview_to_completeopt = 1
+let g:ycm_semantic_triggers =  {
+  \   'c' : ['->', '.','re![_a-zA-z0-9]'],
+  \   'objc' : ['->', '.', 're!\[[_a-zA-Z]+\w*\s', 're!^\s*[^\W\d]\w*\s',
+  \             're!\[.*\]\s'],
+  \   'ocaml' : ['.', '#'],
+  \   'cpp,objcpp' : ['->', '.', '::','re![_a-zA-Z0-9]'],
+  \   'perl' : ['->'],
+  \   'php' : ['->', '::'],
+  \   'java,javascript,typescript,d,python,perl6,scala,vb,elixir,go' : ['.'],
+  \   'cs' : ['.','re![_a-zA-z0-9]'],
+  \   'ruby' : ['.', '::'],
+  \   'lua' : ['.', ':'],
+  \   'erlang' : [':'],
+  \ }
 
 " ========= airline settings start ======================
 
 let g:airline#extensions#tabline#formatter = 'unique_tail'
 let g:airline_detect_whitespace=0
-
 let g:airline_powerline_fonts = 1
-
-" show branch information
-let g:airline#extensions#whitespace#enabled = 0
 let g:airline_theme='transparent'
+
+let g:airline#extensions#whitespace#enabled = 0
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#show_tab_nr = 0
 let g:airline#extensions#tabline#show_tab_count = 0
@@ -149,83 +106,17 @@ let g:airline_left_sep = ''
 let g:airline_left_alt_sep = ''
 let g:airline_right_sep = ''
 let g:airline_right_alt_sep = ''
-call airline#parts#define_accent('mode', 'none')
 
 let g:airline_section_b = ''
 let g:airline_section_c = ''
 let g:airline_section_y = ''
-let g:airline_section_x = '%{airline#util#prepend("",0)}%{airline#util#prepend("",0)}%{airline#util#prepend("",0)}%{airline#util#prepend(airline#extensions#omnisharp#server_status(),0)}%{airline#util#prepend("",0)}'
 let g:airline_section_z = '%#__accent_none#%{g:airline_symbols.linenr}%l%#__restore__#%#__accent_none#/%L'
+
+call airline#parts#define_accent('mode', 'none')
 
 " ========= airline settings end ========================
 
-" =============== OmniSharp settings start===============
-" OmniSharp won't work without this setting
-filetype plugin on
-
-" Use Roslyin and also better performance than HTTP
-let g:OmniSharp_server_stdio = 1
-let g:omnicomplete_fetch_full_documentation = 1
-let g:OmniSharp_start_server = 1
-
-" Timeout in seconds to wait for a response from the server
-let g:OmniSharp_timeout = 30
-
-" this will make it so any subsequent C# files that you open are using the same solution and you aren't prompted again (so you better choose the right solution the first time around :) )
-let g:OmniSharp_autoselect_existing_sln = 1
-
-let g:OmniSharp_popup_options = {
-\ 'padding': [1]
-\}
-autocmd CursorHold *.cs OmniSharpTypeLookup
-let g:OmniSharp_selector_ui = 'fzf'
-let g:OmniSharp_selector_findusages = 'fzf'
-let g:OmniSharp_highlighting = 3
-let g:OmniSharp_diagnostic_listen = 0
-let g:OmniSharp_want_snippet = 1
-
-let g:OmniSharp_popup_mappings = {
-\ 'sigNext': '<C-n>',
-\ 'sigPrev': '<C-p>',
-\ 'lineDown': ['<C-e>', 'j'],
-\ 'lineUp': ['<C-y>', 'k']
-\}
-autocmd FileType cs nmap <silent> <buffer> <C-\> <Plug>(omnisharp_signature_help)
-autocmd FileType cs imap <silent> <buffer> <C-\> <Plug>(omnisharp_signature_help)
-
-nmap <space>o :OmniSharpStartServer<CR> :OmniSharpHighlight<CR>
-" =============== OmniSharp settings end=================
-
-" =================NERDTree settings start===============
-" For more docos check out https://github.com/preservim/nerdtree/blob/master/doc/NERDTree.txt
-let NERDTreeQuitOnOpen=1
-let NERDTreeIgnore = ['\.meta$']
-let NERDTreeNaturalSort=1
-" Open new NERDTree instance bt typing nto
-nmap nt :NERDTree<cr>
-" Open existing NERDTree buffer (if any) at current tab
-nmap ntm :NERDTreeMirror<cr>
-" If you are using vim-plug, you'll also need to add these lines to avoid crashes when calling vim-plug functions while the cursor is on the NERDTree window
-let g:plug_window = 'noautocmd vertical topleft new'
-nmap <space>n :NERDTreeToggle<CR>
-
-" =================NERDTree settings end=================
-
-" fix colors
-set t_Co=256
-
-syntax on
-
-"Disable unsafe commands since we are allowing project specific .vimrc file execution
-set secure
-set mouse=a
-
-hi! CocErrorSign guifg=#d1666a
-
-"Remaps
-nnoremap <silent> <C-p> :Files<CR>
-
-" =================Color Scheme Start=====================
+" =================Color Scheme Start====================
 hi clear
 
 if exists("syntax on")
@@ -262,6 +153,13 @@ let s:warning="#ff6523"
 let s:warning2="#ff2370"
 let s:highlighted="#afff00"
 let s:highlighted2='#5fffff'
+
+
+
+"CS Highlight
+let s:braces='#e9e0b2'
+let s:modifier='#e05c3a'
+let s:class='#7298a3'
 
 set cursorline
 "set cursorlineopt=number
@@ -314,7 +212,7 @@ exe 'hi StorageClass guifg='s:type'  gui=italic'
 exe 'hi String guifg='s:str  
 exe 'hi Tag guifg='s:keyword  
 exe 'hi Title guifg='s:fg'  gui=NONE'
-exe 'hi Todo guifg='s:fg2'  gui=inverse,NONE'
+exe 'hi Todo guifg='s:comment'  guibg='s:cursorLinebg'  gui=NONE'
 exe 'hi Type guifg='s:type 
 exe 'hi Underlined   gui=underline'
 
@@ -354,7 +252,10 @@ exe 'hi csInstanceVariable guifg='s:var
 exe 'hi csKeyword guifg='s:keyword
 exe 'hi csKeywordAsMethod guifg='s:keyword' gui=NONE'
 exe 'hi csClassDeclaration guifg='s:keyword' gui=NONE'
-exe 'hi csClass guifg='s:keyword' gui=NONE'
+exe 'hi csClass guifg='s:class' gui=NONE'
+exe 'hi csBraces guifg='s:braces' gui=NONE'
+exe 'hi csParens guifg='s:braces' gui=NONE'
+exe 'hi csModifier guifg='s:modifier' gui=NONE'
 exe 'hi csNumber guifg='s:const
 
 
@@ -381,3 +282,7 @@ exe 'hi QuickScopePrimary guifg='s:highlighted' gui=underline'
 exe 'hi QuickScopeSecondary guifg='s:highlighted2' gui=underline'
 
 " ==================Color Scheme End======================
+
+map <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<'
+\ . synIDattr(synID(line("."),col("."),0),"name") . "> lo<"
+\ . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . ">"<CR>
