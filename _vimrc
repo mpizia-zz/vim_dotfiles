@@ -18,11 +18,14 @@ set updatetime=500
 set t_Co=256
 set secure
 set mouse=a
-"set signcolumn=no
+set wildmenu
+
+command! -bang -nargs=? -complete=dir Files
+    \ call fzf#vim#files(<q-args>, {'options': ['--info=inline', '--preview', 'bat --color=always {}']}, <bang>0)
 
 filetype indent plugin on
 
-map p "+gP
+map P "+gP
 nnoremap <silent> <C-p> :Files<CR>
 
 "Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
@@ -63,6 +66,7 @@ if !has("gui_running")
     set t_Co=256
     let &t_AB="\e[48;5;%dm"
     let &t_AF="\e[38;5;%dm"
+    set term=xterm
 endif
 
 set completeopt+=popup
@@ -124,16 +128,14 @@ syntax reset
 endif
 
 set t_Co=256
-"let g:colors_name = "darktooth"
-
 
 " Define reusable colorvariables.
 let s:white="#FFFFFF"
 let s:bg="#282828"
-let s:fg="#fdf4c1"
-let s:fg2="#e9e0b2"
-let s:fg3="#d5cda2"
-let s:fg4="#c0b993"
+let s:fg= "#BDAE93"
+let s:fg2="#D5C4A1"
+let s:fg3="#A89984"
+let s:fg4="#A89984"
 let s:bg2="#222222"
 let s:bg3="#4a4a4a"
 let s:bg4="#5c5c5c"
@@ -160,6 +162,7 @@ let s:highlighted2='#5fffff'
 let s:braces='#e9e0b2'
 let s:modifier='#e05c3a'
 let s:class='#7298a3'
+let s:numbers='#8EC07C'
 
 set cursorline
 "set cursorlineopt=number
@@ -256,7 +259,7 @@ exe 'hi csClass guifg='s:class' gui=NONE'
 exe 'hi csBraces guifg='s:braces' gui=NONE'
 exe 'hi csParens guifg='s:braces' gui=NONE'
 exe 'hi csModifier guifg='s:modifier' gui=NONE'
-exe 'hi csNumber guifg='s:const
+exe 'hi csNumber guifg='s:numbers
 
 
 " Markdown Highlighting
