@@ -94,7 +94,7 @@ let g:ycm_semantic_triggers =  {
 let g:airline#extensions#tabline#formatter = 'unique_tail'
 let g:airline_detect_whitespace=0
 let g:airline_powerline_fonts = 1
-let g:airline_theme='transparent'
+let g:airline_theme='tomorrow'
 
 let g:airline#extensions#whitespace#enabled = 0
 let g:airline#extensions#tabline#enabled = 1
@@ -260,7 +260,6 @@ exe 'hi csBraces guifg='s:braces' gui=NONE'
 exe 'hi csParens guifg='s:braces' gui=NONE'
 exe 'hi csModifier guifg='s:modifier' gui=NONE'
 exe 'hi csNumber guifg='s:numbers
-
 
 " Markdown Highlighting
 exe 'hi mkdCode guifg='s:builtin
