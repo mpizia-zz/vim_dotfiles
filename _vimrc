@@ -116,7 +116,7 @@ let g:airline_section_c = ''
 let g:airline_section_y = ''
 let g:airline_section_z = '%#__accent_none#%{g:airline_symbols.linenr}%l%#__restore__#%#__accent_none#/%L'
 
-call airline#parts#define_accent('mode', 'none')
+" call airline#parts#define_accent('mode', 'none')
 
 " ========= airline settings end ========================
 
