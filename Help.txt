@@ -1,0 +1,6 @@
+source C:\UnityProjects\vim_dotfiles\_vimrc
+source C:\UnityProjects\vim_dotfiles\_gvimrc
+
+
+Unity Script Editor Args
+ $(Line) $(File)
